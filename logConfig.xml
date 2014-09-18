@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<log4php:configuration xmlns:log4php="http://logging.apache.org/log4php/">
+    <appender name="importLogger" class="LoggerAppenderDailyFile">
+        <param name="file" value="logs/%s-import.log" />
+        <param name="datePattern" value="Y-m-d" />
+        <layout class="LoggerLayoutPattern">
+            <param name="ConversionPattern" value="%d{Y-m-d H:i:s} [%p]: %m (at %F line %L)%n" />
+        </layout>
+    </appender>
+    <root>
+        <level value="ALL" />
+        <appender-ref ref="importLogger" />
+    </root>
+</log4php:configuration>

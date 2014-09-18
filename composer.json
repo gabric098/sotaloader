@@ -1,0 +1,20 @@
+{
+    "name": "iz1ksw/SotaImport",
+    "description": "Library to convert and import Summit list csv to MySql db",
+    "minimum-stability": "alpha",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Gabriele Antonini (IZ1KSW)",
+            "email": "iz1ksw@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "iz1ksw\\SotaImport\\": "src/iz1ksw/SotaImport"
+        }
+    },
+    "require": {
+        "apache/log4php": "2.3.0"
+    }
+}
