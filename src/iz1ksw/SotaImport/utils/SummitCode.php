@@ -24,6 +24,6 @@ class SummitCode {
     }
 
     function getSummitId() {
-        return substr($this->summitCode, strpos($this->summitCode, '-'));
+        return substr($this->summitCode, strpos($this->summitCode, '-')+1);
     }
 }

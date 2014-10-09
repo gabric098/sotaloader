@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `activation` (
   `summit_id` mediumint(8) unsigned NOT NULL,
   `activations_count` mediumint(8) unsigned NOT NULL,
   `last_activation_date` date NOT NULL,
-  `last_activation_call` char(30) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `last_activation_call` char(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
 
@@ -87,16 +87,16 @@ DROP TABLE IF EXISTS `region`;
 CREATE TABLE IF NOT EXISTS `region` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `association_id` smallint(5) unsigned NOT NULL,
-  `code` char(2) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `name` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `code` char(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `name` char(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 DROP TABLE IF EXISTS `summit`;
 CREATE TABLE IF NOT EXISTS `summit` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-  `code` char(20) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `name` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `code` char(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `name` char(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `sota_id` char(5) NOT NULL,
   `association_id` smallint(5) unsigned NOT NULL,
   `region_id` smallint(5) unsigned NOT NULL,

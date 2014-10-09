@@ -13,10 +13,10 @@ use iz1ksw\SotaImport\log\SotaLogger;
 use iz1ksw\SotaImport\CsvSummit;
 
 class DbAdapter {
-    private $dbhost = '';
-    private $dbname = '';
-    private $dbuser = '';
-    private $dbpwd = '';
+    private $dbhost = 'localhost';
+    private $dbname = 'gabriele_sotapi';
+    private $dbuser = 'root';
+    private $dbpwd = 'root';
     /**
      * @var $pdo \PDO
      */
@@ -90,10 +90,24 @@ class DbAdapter {
             $bonus_points = (int)$summit->getBonusPoints();
             $valid_from = (string)DateUtils::toDatabaseDate($summit->getValidFrom());
             $valid_to = (string)DateUtils::toDatabaseDate($summit->getValidTo());
+            /*echo($assoc_code. " " .
+            $assoc_name. " " .
+            $reg_code. " " .
+            $reg_name. " " .
+            $code. " " .
+            $name. " " .
+            $sota_id. " " .
+            $altitude_m. " " .
+            $altitude_ft. " " .
+            $latitude. " " .
+            $longitude. " " .
+            $points. " " .
+            $bonus_points. " " .
+            $valid_from. " " .
+            $valid_to . "\r\n");*/
             if ($st->execute() === false) {
                 echo(implode($st->errorInfo()));
             }
-            break;
         }
         $this->closeConnection();
 

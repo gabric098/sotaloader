@@ -37,13 +37,10 @@ class CsvImport {
 
         // parse the Csv file
         $parser = new SotaCsvParser(CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
-        $grandCount = 0;
         $dba = new DbAdapter();
         while ($parser->parseMoreElement() === true) {
             $dba->addSummits($parser->getCsvArray());
         }
-        echo("GRAND COUNT: " . $grandCount);
-
     }
 
     private function copyCsvToLocal()
