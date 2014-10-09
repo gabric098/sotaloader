@@ -13,10 +13,6 @@ use iz1ksw\SotaImport\log\SotaLogger;
 use iz1ksw\SotaImport\CsvSummit;
 
 class DbAdapter {
-    private $dbhost = 'localhost';
-    private $dbname = 'gabriele_sotapi';
-    private $dbuser = 'root';
-    private $dbpwd = 'root';
     /**
      * @var $pdo \PDO
      */
@@ -25,10 +21,15 @@ class DbAdapter {
      * @var $log \Logger
      */
     private $log;
+    /**
+     * @var $config
+     */
+    private $config;
 
     public function __construct()
     {
         $this->log = SotaLogger::getLogger();
+        $this->config = parse_ini_file('config.ini', true);
     }
 
     /**
@@ -116,7 +117,8 @@ class DbAdapter {
     private function openConnection()
     {
         try {
-            $this->pdo = new \PDO("mysql:host=$this->dbhost;dbname=$this->dbname", $this->dbuser, $this->dbpwd);
+            $this->pdo = new \PDO("mysql:host=" . $this->config['db_host'] . ";dbname=" . $this->config['db_name'],
+                $this->config['db_user'], $this->config['db_pass']);
         } catch (\PDOException $e) {
             $this->log->error("Connection Failed: " . $e->getMessage());
             die();
