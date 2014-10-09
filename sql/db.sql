@@ -13,9 +13,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `add_summit`(in assoc_code CHAR(5),
   in assoc_name CHAR(50),
   in reg_code CHAR(2),
   in reg_name CHAR(100),
-  in code CHAR(20),
-  in name CHAR(100),
-  in sota_id CHAR(5),
+  in p_code CHAR(20),
+  in p_name CHAR(100),
+  in p_sota_id CHAR(5),
   in altitude_m SMALLINT(5),
   in altitude_ft SMALLINT(5),
   in longitude DECIMAL(10,4),
@@ -25,33 +25,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `add_summit`(in assoc_code CHAR(5),
   in valid_from DATE,
   in valid_to DATE)
 BEGIN  
-  declare assoc_id SMALLINT(5);
-  declare region_id SMALLINT(5);
-  declare summit_id MEDIUMINT(8);    
+  declare v_assoc_id SMALLINT(5);
+  declare v_region_id SMALLINT(5);
+  declare v_summit_id MEDIUMINT(8);
 
   -- ASSOCIATION check if an association with the given code and name already exists
-  SELECT id INTO assoc_id FROM association LIMIT 1;
-  call debug_msg(assoc_id);
+  SELECT id INTO v_assoc_id FROM association WHERE association.code = assoc_code AND association.name = assoc_name LIMIT 1;
 
-  IF (assoc_id IS NULL) THEN
+  IF (v_assoc_id IS NULL) THEN
     INSERT INTO association(code, name) VALUES (assoc_code, assoc_name);
-    set assoc_id = (select last_insert_id());
+    set v_assoc_id = (select last_insert_id());
   END IF;
 
   -- REGION check if a region with the given code and name already exists
-  SET region_id = (SELECT id FROM region WHERE code = reg_code AND name = reg_name AND association_id = assoc_id);
-  IF (region_id IS NULL) THEN
-    INSERT INTO region(association_id, code, name) VALUES (assoc_id, reg_code, reg_name);
-    set region_id = (select last_insert_id());
+  SET v_region_id = (SELECT id FROM region WHERE region.code = reg_code AND region.name = reg_name AND region.association_id = v_assoc_id);
+  IF (v_region_id IS NULL) THEN
+    INSERT INTO region(association_id, code, name) VALUES (v_assoc_id, reg_code, reg_name);
+    set v_region_id = (select last_insert_id());
   END IF;
 
   -- SUMMIT check if a summit with given parameters already exists
-  SET summit_id = (SELECT id FROM summit WHERE association_id = assoc_id AND region_id = region_id
-                                               AND code = code AND name = name AND sota_id = sota_id);
-  IF (summit_id IS NULL) THEN
+  SET v_summit_id = (SELECT id FROM summit WHERE summit.association_id = v_assoc_id AND summit.region_id = v_region_id
+                                               AND summit.code = p_code AND summit.name = p_name AND summit.sota_id = p_sota_id);
+  IF (v_summit_id IS NULL) THEN
     INSERT INTO summit(code, name, sota_id, association_id,  region_id, altitude_m, altitude_ft, longitude,
     latitude, points, bonus_points, valid_from, valid_to)
-      VALUES (code, name, sota_id, assoc_id, region_id, altitude_m, altitude_ft, longitude, latitude,
+      VALUES (p_code, p_name, p_sota_id, v_assoc_id, v_region_id, altitude_m, altitude_ft, longitude, latitude,
       points, bonus_points, valid_from, valid_to);
   END IF;
 END$$
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `activation` (
   `last_activation_date` date NOT NULL,
   `last_activation_call` char(30) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
 
 DROP TABLE IF EXISTS `association`;
 CREATE TABLE IF NOT EXISTS `association` (
@@ -82,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `association` (
   `code` char(5) NOT NULL,
   `name` char(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 DROP TABLE IF EXISTS `region`;
 CREATE TABLE IF NOT EXISTS `region` (
@@ -91,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `region` (
   `code` char(2) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `name` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=61 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 DROP TABLE IF EXISTS `summit`;
 CREATE TABLE IF NOT EXISTS `summit` (
@@ -113,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `summit` (
   KEY `region_id` (`region_id`),
   KEY `association_id` (`association_id`),
   KEY `code` (`code`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=49 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
