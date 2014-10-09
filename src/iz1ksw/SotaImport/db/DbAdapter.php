@@ -117,8 +117,8 @@ class DbAdapter {
     private function openConnection()
     {
         try {
-            $this->pdo = new \PDO("mysql:host=" . $this->config['db_host'] . ";dbname=" . $this->config['db_name'],
-                $this->config['db_user'], $this->config['db_pass']);
+            $this->pdo = new \PDO("mysql:host=" . $this->config['db_host'] . ";dbname=" . $this->config['db_name'] .
+                ";charset=utf8", $this->config['db_user'], $this->config['db_pass']);
         } catch (\PDOException $e) {
             $this->log->error("Connection Failed: " . $e->getMessage());
             die();
