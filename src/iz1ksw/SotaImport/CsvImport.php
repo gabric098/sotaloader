@@ -47,7 +47,18 @@ class CsvImport {
             $dba->addSummits($parser->getCsvArray());
         }
 
-        $this->sendMail($dba->getOutput());
+        // send a confirmation email
+        if (isset($this->config['mail_to']) && $this->config['mail_to'] != '') {
+            $this->log->info("Sending confirmation email to " . $this->config['mail_to']);
+            $this->sendMail($dba->getOutput());
+        }
+
+        // delete temporary file
+        if (!unlink(CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME)) {
+            $this->log->error("Unable to delete temporary file: " .
+                CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
+        }
+        $this->log->info("CSV file process finished.");
     }
 
     private function copyCsvToLocal()
@@ -64,19 +75,19 @@ class CsvImport {
     private function sendMail($results) {
         $message = "Import execution result:\r\n";
         $message .= "-------------------------------------------------------------------------------------------\r\n";
-        $message .= "New associations: " . count($results["new_assoc"]);
-        $message .= $this->printArrayVals($results["new_assoc"]);
-        $message .= "New regions: " . count($results["new_region"]);
-        $message .= $this->printArrayVals($results["new_region"]);
-        $message .= "New summits: " . count($results["new_summit"]);
-        $message .= $this->printArrayVals($results["new_summit"]);
-        $message .= "Updated associations: " . count($results["upd_assoc"]);
-        $message .= $this->printArrayVals($results["upd_assoc"]);
-        $message .= "Updated regions: " . count($results["upd_region"]);
-        $message .= $this->printArrayVals($results["upd_region"]);
-        $message .= "Updated summits: " . count($results["upd_summit"]);
+        $message .= "New associations: " . count($results["new_assoc"]) . "\r\n";
+        $message .= $this->printArrayVals($results["new_assoc"]) . "\r\n";
+        $message .= "New regions: " . count($results["new_region"]) . "\r\n";
+        $message .= $this->printArrayVals($results["new_region"]) . "\r\n";
+        $message .= "New summits: " . count($results["new_summit"]) . "\r\n";
+        $message .= $this->printArrayVals($results["new_summit"]) . "\r\n";
+        $message .= "Updated associations: " . count($results["upd_assoc"]) . "\r\n";
+        $message .= $this->printArrayVals($results["upd_assoc"]) . "\r\n";
+        $message .= "Updated regions: " . count($results["upd_region"]) . "\r\n";
+        $message .= $this->printArrayVals($results["upd_region"]) . "\r\n";
+        $message .= "Updated summits: " . count($results["upd_summit"]) . "\r\n";
         $message .= $this->printArrayVals($results["upd_summit"]);
-        $message .= "-------------------------------------------------------------------------------------------\r\n";
+        $message .= "-------------------------------------------------------------------------------------------";
         mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
     }
 
