@@ -54,7 +54,7 @@ class CsvImport {
         }
 
         // delete temporary file
-        if (!unlink(CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME)) {
+        if (!unlink(CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME)) {
             $this->log->error("Unable to delete temporary file: " .
                 CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
         }
