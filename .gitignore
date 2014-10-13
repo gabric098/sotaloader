@@ -43,8 +43,10 @@ atlassian-ide-plugin.xml
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 
+# composer filed
 composer.phar
 vendor/
 
+# csv and logs folders
 csv_file/
 logs/
