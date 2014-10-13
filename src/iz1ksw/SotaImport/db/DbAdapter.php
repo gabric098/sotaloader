@@ -26,10 +26,18 @@ class DbAdapter {
      */
     private $config;
 
-    public function __construct()
+    private $output;
+
+    public function __construct($config)
     {
         $this->log = SotaLogger::getLogger();
-        $this->config = parse_ini_file('config.ini', true);
+        $this->config = $config;
+        $this->output["new_assoc"] = array();
+        $this->output["new_region"] = array();
+        $this->output["new_summit"] = array();
+        $this->output["upd_assoc"] = array();
+        $this->output["upd_region"] = array();
+        $this->output["upd_summit"] = array();
     }
 
     /**
@@ -38,15 +46,23 @@ class DbAdapter {
     public function addSummits($summitList)
     {
         $this->openConnection();
-        $fieldList = ['assoc_code', 'assoc_name', 'reg_code', 'reg_name', 'code', 'name',
+        $inFieldList = ['assoc_code', 'assoc_name', 'reg_code', 'reg_name', 'code', 'name',
         'sota_id', 'altitude_m', 'altitude_ft', 'longitude', 'latitude', 'points', 'bonus_points', 'valid_from', 'valid_to'];
+        $outFieldList = ['new_assoc', 'new_region', 'new_summit', 'upd_assoc', 'upd_region', 'upd_summit'];
         $psQuery = "CALL add_summit(";
         $i = 0;
-        foreach ($fieldList as $field) {
+        foreach ($inFieldList as $field) {
             if ($i > 0) {
                 $psQuery .= ', ';
             }
             $psQuery .= ':' . $field;
+            $i++;
+        }
+        foreach ($outFieldList as $field) {
+            if ($i > 0) {
+                $psQuery .= ', ';
+            }
+            $psQuery .= '@' . $field;
             $i++;
         }
         $psQuery .= ')';
@@ -68,7 +84,7 @@ class DbAdapter {
         $valid_from = '';
         $valid_to = '';
 
-        foreach ($fieldList as $field) {
+        foreach ($inFieldList as $field) {
             $st->bindParam(':' . $field, ${$field});
         }
 
@@ -91,27 +107,34 @@ class DbAdapter {
             $bonus_points = (int)$summit->getBonusPoints();
             $valid_from = (string)DateUtils::toDatabaseDate($summit->getValidFrom());
             $valid_to = (string)DateUtils::toDatabaseDate($summit->getValidTo());
-            /*echo($assoc_code. " " .
-            $assoc_name. " " .
-            $reg_code. " " .
-            $reg_name. " " .
-            $code. " " .
-            $name. " " .
-            $sota_id. " " .
-            $altitude_m. " " .
-            $altitude_ft. " " .
-            $latitude. " " .
-            $longitude. " " .
-            $points. " " .
-            $bonus_points. " " .
-            $valid_from. " " .
-            $valid_to . "\r\n");*/
             if ($st->execute() === false) {
                 echo(implode($st->errorInfo()));
             }
+            $outputArray = $this->pdo->query("SELECT @new_assoc, @new_region, @new_summit, @upd_assoc, @upd_region, @upd_summit")->fetchAll();
+
+            foreach($outputArray as $row)
+            {
+                if ($row["@new_assoc"] != null) {
+                    $this->output["new_assoc"][] = $row["@new_assoc"];
+                }
+                if ($row["@new_region"] != null) {
+                    $this->output["new_region"][] = $row["@new_region"];
+                }
+                if ($row["@new_summit"] != null) {
+                    $this->output["new_summit"][] = $row["@new_summit"];
+                }
+                if ($row["@upd_assoc"] != null) {
+                    $this->output["upd_assoc"][] = $row["@upd_assoc"];
+                }
+                if ($row["@upd_region"] != null) {
+                    $this->output["upd_region"][] = $row["@upd_region"];
+                }
+                if ($row["@upd_summit"] != null) {
+                    $this->output["upd_summit"][] = $row["@upd_summit"];
+                }
+            }
         }
         $this->closeConnection();
-
     }
 
     private function openConnection()
@@ -130,4 +153,13 @@ class DbAdapter {
         // destroy the object and close the connection
         $this->pdo = null;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
 }

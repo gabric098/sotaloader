@@ -23,44 +23,77 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `add_summit`(in assoc_code CHAR(5),
   in points TINYINT(3),
   in bonus_points TINYINT(3),
   in valid_from DATE,
-  in valid_to DATE)
+  in valid_to DATE,
+  out new_assoc CHAR(255),
+  out new_region CHAR(255),
+  out new_summit CHAR(255),
+  out upd_assoc CHAR(255),
+  out upd_region CHAR(255),
+  out upd_summit CHAR(255)
+)
 BEGIN  
   declare v_assoc_id SMALLINT(5);
   declare v_region_id SMALLINT(5);
   declare v_summit_id MEDIUMINT(8);
 
-  -- ASSOCIATION check if an association with the given code and name already exists
-  SELECT id INTO v_assoc_id FROM association WHERE association.code = assoc_code AND association.name = assoc_name LIMIT 1;
+  -- ASSOCIATION just check if an association with given association code exists
+  SELECT id INTO v_assoc_id FROM association WHERE association.code = assoc_code LIMIT 1;
 
   IF (v_assoc_id IS NULL) THEN
     INSERT INTO association(code, name) VALUES (assoc_code, assoc_name);
     set v_assoc_id = (select last_insert_id());
+    set new_assoc = CONCAT(assoc_code, ' - ', assoc_name);
+  ELSE -- check if association name has changed, and change the record accordingly
+    IF (SELECT association.name != assoc_name FROM association WHERE association.code = assoc_code LIMIT 1) THEN
+      UPDATE association SET association.name = assoc_name WHERE association.code = assoc_code;
+      set upd_assoc = CONCAT(assoc_code, ' - ', assoc_name);
+    END IF;
   END IF;
 
-  -- REGION check if a region with the given code and name already exists
-  SET v_region_id = (SELECT id FROM region WHERE region.code = reg_code AND region.name = reg_name AND region.association_id = v_assoc_id);
+  -- REGION check if a region with the given code and association id already exists
+  SELECT id INTO v_region_id FROM region WHERE region.code = reg_code AND region.association_id = v_assoc_id;
+
   IF (v_region_id IS NULL) THEN
     INSERT INTO region(association_id, code, name) VALUES (v_assoc_id, reg_code, reg_name);
     set v_region_id = (select last_insert_id());
+    set new_region = CONCAT(reg_code, ' - ', reg_name);
+  ELSE -- check if region name has changed, and change the record accordingly
+    IF (SELECT region.name != reg_name FROM region WHERE region.code = reg_code AND region.association_id = v_assoc_id) THEN
+      UPDATE region SET region.name = reg_name WHERE region.code = reg_code AND region.association_id = v_assoc_id;
+      set upd_region = CONCAT(reg_code, ' - ', reg_name);
+    END IF;
   END IF;
 
   -- SUMMIT check if a summit with given parameters already exists
   SET v_summit_id = (SELECT id FROM summit WHERE summit.association_id = v_assoc_id AND summit.region_id = v_region_id
-                                               AND summit.code = p_code AND summit.name = p_name AND summit.sota_id = p_sota_id);
+                               AND summit.code = p_code AND summit.sota_id = p_sota_id);
   IF (v_summit_id IS NULL) THEN
     INSERT INTO summit(code, name, sota_id, association_id,  region_id, altitude_m, altitude_ft, longitude,
     latitude, points, bonus_points, valid_from, valid_to)
       VALUES (p_code, p_name, p_sota_id, v_assoc_id, v_region_id, altitude_m, altitude_ft, longitude, latitude,
       points, bonus_points, valid_from, valid_to);
+    set new_summit = CONCAT(p_code, ' - ', p_name);
+  ELSE -- check if some of the summit properties have changed and update the summit record
+    IF (SELECT (summit.name != p_name OR summit.altitude_m != altitude_m OR summit.altitude_ft != altitude_ft OR
+               summit.latitude != latitude OR summit.longitude != longitude OR summit.points != points OR
+               summit.bonus_points != bonus_points OR summit.valid_from != valid_from OR summit.valid_to != valid_to)
+        FROM
+          summit
+        WHERE
+          summit.association_id = v_assoc_id AND summit.region_id = v_region_id AND
+          summit.code = p_code AND summit.sota_id = p_sota_id) THEN
+      UPDATE
+          summit
+      SET
+          summit.name = p_name, summit.altitude_m = altitude_m, summit.altitude_ft = altitude_ft,
+          summit.longitude = longitude, summit.latitude = latitude, summit.points = points,
+          summit.bonus_points = bonus_points, summit.valid_from = valid_from, summit.valid_to = valid_to
+      WHERE
+          summit.association_id = v_assoc_id AND summit.region_id = v_region_id AND
+          summit.code = p_code AND summit.sota_id = p_sota_id;
+      set upd_summit = CONCAT(p_code, ' - ', p_name);
+      END IF;
   END IF;
-END$$
-
-DROP PROCEDURE IF EXISTS `debug_msg`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `debug_msg`(msg VARCHAR(255))
-BEGIN
-  IF true THEN BEGIN
-    select concat("** ", msg) AS '** DEBUG:';
-  END; END IF;
 END$$
 
 DELIMITER ;
