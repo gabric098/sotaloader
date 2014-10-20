@@ -37,60 +37,60 @@ BEGIN
   declare v_summit_id MEDIUMINT(8);
 
   -- ASSOCIATION just check if an association with given association code exists
-  SELECT id INTO v_assoc_id FROM association WHERE association.code = assoc_code LIMIT 1;
+  SELECT id INTO v_assoc_id FROM associations WHERE associations.code = assoc_code LIMIT 1;
 
   IF (v_assoc_id IS NULL) THEN
-    INSERT INTO association(code, name) VALUES (assoc_code, assoc_name);
+    INSERT INTO associations(code, name) VALUES (assoc_code, assoc_name);
     set v_assoc_id = (select last_insert_id());
     set new_assoc = CONCAT(assoc_code, ' - ', assoc_name);
   ELSE -- check if association name has changed, and change the record accordingly
-    IF (SELECT association.name != assoc_name FROM association WHERE association.code = assoc_code LIMIT 1) THEN
-      UPDATE association SET association.name = assoc_name WHERE association.code = assoc_code;
+    IF (SELECT associations.name != assoc_name FROM associations WHERE associations.code = assoc_code LIMIT 1) THEN
+      UPDATE associations SET associations.name = assoc_name WHERE associations.code = assoc_code;
       set upd_assoc = CONCAT(assoc_code, ' - ', assoc_name);
     END IF;
   END IF;
 
   -- REGION check if a region with the given code and association id already exists
-  SELECT id INTO v_region_id FROM region WHERE region.code = reg_code AND region.association_id = v_assoc_id;
+  SELECT id INTO v_region_id FROM regions WHERE regions.code = reg_code AND regions.association_id = v_assoc_id;
 
   IF (v_region_id IS NULL) THEN
-    INSERT INTO region(association_id, code, name) VALUES (v_assoc_id, reg_code, reg_name);
+    INSERT INTO regions(association_id, code, name) VALUES (v_assoc_id, reg_code, reg_name);
     set v_region_id = (select last_insert_id());
     set new_region = CONCAT(reg_code, ' - ', reg_name);
   ELSE -- check if region name has changed, and change the record accordingly
-    IF (SELECT region.name != reg_name FROM region WHERE region.code = reg_code AND region.association_id = v_assoc_id) THEN
-      UPDATE region SET region.name = reg_name WHERE region.code = reg_code AND region.association_id = v_assoc_id;
+    IF (SELECT regions.name != reg_name FROM regions WHERE regions.code = reg_code AND regions.association_id = v_assoc_id) THEN
+      UPDATE regions SET regions.name = reg_name WHERE regions.code = reg_code AND regions.association_id = v_assoc_id;
       set upd_region = CONCAT(reg_code, ' - ', reg_name);
     END IF;
   END IF;
 
   -- SUMMIT check if a summit with given parameters already exists
-  SET v_summit_id = (SELECT id FROM summit WHERE summit.association_id = v_assoc_id AND summit.region_id = v_region_id
-                               AND summit.code = p_code AND summit.sota_id = p_sota_id);
+  SET v_summit_id = (SELECT id FROM summits WHERE summits.association_id = v_assoc_id AND summits.region_id = v_region_id
+                               AND summits.code = p_code AND summits.sota_id = p_sota_id);
   IF (v_summit_id IS NULL) THEN
-    INSERT INTO summit(code, name, sota_id, association_id,  region_id, altitude_m, altitude_ft, longitude,
+    INSERT INTO summits(code, name, sota_id, association_id,  region_id, altitude_m, altitude_ft, longitude,
     latitude, points, bonus_points, valid_from, valid_to)
       VALUES (p_code, p_name, p_sota_id, v_assoc_id, v_region_id, altitude_m, altitude_ft, longitude, latitude,
       points, bonus_points, valid_from, valid_to);
     set new_summit = CONCAT(p_code, ' - ', p_name);
   ELSE -- check if some of the summit properties have changed and update the summit record
-    IF (SELECT (summit.name != p_name OR summit.altitude_m != altitude_m OR summit.altitude_ft != altitude_ft OR
-               summit.latitude != latitude OR summit.longitude != longitude OR summit.points != points OR
-               summit.bonus_points != bonus_points OR summit.valid_from != valid_from OR summit.valid_to != valid_to)
+    IF (SELECT (summits.name != p_name OR summits.altitude_m != altitude_m OR summits.altitude_ft != altitude_ft OR
+               summits.latitude != latitude OR summits.longitude != longitude OR summits.points != points OR
+               summits.bonus_points != bonus_points OR summits.valid_from != valid_from OR summits.valid_to != valid_to)
         FROM
-          summit
+          summits
         WHERE
-          summit.association_id = v_assoc_id AND summit.region_id = v_region_id AND
-          summit.code = p_code AND summit.sota_id = p_sota_id) THEN
+          summits.association_id = v_assoc_id AND summits.region_id = v_region_id AND
+          summits.code = p_code AND summits.sota_id = p_sota_id) THEN
       UPDATE
-          summit
+          summits
       SET
-          summit.name = p_name, summit.altitude_m = altitude_m, summit.altitude_ft = altitude_ft,
-          summit.longitude = longitude, summit.latitude = latitude, summit.points = points,
-          summit.bonus_points = bonus_points, summit.valid_from = valid_from, summit.valid_to = valid_to
+          summits.name = p_name, summits.altitude_m = altitude_m, summits.altitude_ft = altitude_ft,
+          summits.longitude = longitude, summits.latitude = latitude, summits.points = points,
+          summits.bonus_points = bonus_points, summits.valid_from = valid_from, summits.valid_to = valid_to
       WHERE
-          summit.association_id = v_assoc_id AND summit.region_id = v_region_id AND
-          summit.code = p_code AND summit.sota_id = p_sota_id;
+          summits.association_id = v_assoc_id AND summits.region_id = v_region_id AND
+          summits.code = p_code AND summits.sota_id = p_sota_id;
       set upd_summit = CONCAT(p_code, ' - ', p_name);
       END IF;
   END IF;
@@ -98,8 +98,8 @@ END$$
 
 DELIMITER ;
 
-DROP TABLE IF EXISTS `activation`;
-CREATE TABLE IF NOT EXISTS `activation` (
+DROP TABLE IF EXISTS `activations`;
+CREATE TABLE IF NOT EXISTS `activations` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `summit_id` mediumint(8) unsigned NOT NULL,
   `activations_count` mediumint(8) unsigned NOT NULL,
@@ -108,16 +108,16 @@ CREATE TABLE IF NOT EXISTS `activation` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
 
-DROP TABLE IF EXISTS `association`;
-CREATE TABLE IF NOT EXISTS `association` (
+DROP TABLE IF EXISTS `associations`;
+CREATE TABLE IF NOT EXISTS `associations` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `code` char(5) NOT NULL,
   `name` char(50) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
-DROP TABLE IF EXISTS `region`;
-CREATE TABLE IF NOT EXISTS `region` (
+DROP TABLE IF EXISTS `regions`;
+CREATE TABLE IF NOT EXISTS `regions` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `association_id` smallint(5) unsigned NOT NULL,
   `code` char(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -125,8 +125,8 @@ CREATE TABLE IF NOT EXISTS `region` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
-DROP TABLE IF EXISTS `summit`;
-CREATE TABLE IF NOT EXISTS `summit` (
+DROP TABLE IF EXISTS `summits`;
+CREATE TABLE IF NOT EXISTS `summits` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `code` char(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `name` char(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
