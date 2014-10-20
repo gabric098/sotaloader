@@ -12,9 +12,7 @@ use Logger;
 
 
 class CsvImport {
-    const CSV_REMOTE_PATH = 'http://www.sotadata.org.uk/summitslist.csv';
     const CSV_LOCAL_PATH = 'csv_file';
-    const CSV_LOCAL_TEMP_NAME = 'summitslist.csv.tmp';
     const LOG_CONFIG = '';
 
     /* @var $log Logger */
@@ -23,11 +21,16 @@ class CsvImport {
      * @var $config
      */
     private $config;
+    /**
+     * @var string
+     */
+    private $csvFileName;
 
     function __construct()
     {
         // read initialization file
         $this->config = parse_ini_file('config.ini', true);
+        $this->csvFileName = basename($this->config['cvs_remote_path']);
         // initialize the logger
         $this->log = SotaLogger::getLogger();
         // start csv file import
@@ -41,7 +44,7 @@ class CsvImport {
         }
 
         // parse the Csv file
-        $parser = new SotaCsvParser(CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
+        $parser = new SotaCsvParser(CsvImport::CSV_LOCAL_PATH . '/' . $this->csvFileName);
         $dba = new DbAdapter($this->config);
         while ($parser->parseMoreElement() === true) {
             $dba->addSummits($parser->getCsvArray());
@@ -53,18 +56,18 @@ class CsvImport {
             $this->sendMail($dba->getOutput());
         }
 
-        // delete temporary file
-        if (!unlink(CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME)) {
-            $this->log->error("Unable to delete temporary file: " .
-                CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
+        // rename temporary file with date
+        if (!rename(CsvImport::CSV_LOCAL_PATH . '/' . $this->csvFileName, CsvImport::CSV_LOCAL_PATH . '/' .
+            date('Ymd') . '_'. $this->csvFileName)) {
+            $this->log->error("Unable to rename temporary file");
         }
         $this->log->info("CSV file process finished.");
     }
 
     private function copyCsvToLocal()
     {
-        if (copy(CsvImport::CSV_REMOTE_PATH, CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME)) {
-            $this->log->info("Csv file sucessfully copyied to " . CsvImport::CSV_LOCAL_PATH . '/' . CsvImport::CSV_LOCAL_TEMP_NAME);
+        if (copy($this->config['cvs_remote_path'], CsvImport::CSV_LOCAL_PATH . '/' . $this->csvFileName)) {
+            $this->log->info("Csv file sucessfully copyied to " . CsvImport::CSV_LOCAL_PATH . '/' . $this->csvFileName);
             return true;
         } else {
             $this->log->error("Error copying csv file from remote location.");
