@@ -120,7 +120,7 @@ class SotaCsvParser {
             $csvSummit->setActivationCount(intval($csvRowData[SotaCsvParser::$csvConfig["ACTIVATIONS_COUNT"]]));
         }
         if ($csvRowData[SotaCsvParser::$csvConfig["LAST_ACTIVATION_DATE"]] != '') {
-            $csvSummit->setLastActivationDate($csvRowData[SotaCsvParser::$csvConfig["LAST_ACTIVATION_DATE"]]);
+            $csvSummit->setLastActivationDate(\DateTime::createFromFormat('d/m/Y', $csvRowData[SotaCsvParser::$csvConfig["LAST_ACTIVATION_DATE"]]));
         }
         if ($csvRowData[SotaCsvParser::$csvConfig["LAST_ACTIVATION_CALL"]] != '') {
             $csvSummit->setLastActivationCall($csvRowData[SotaCsvParser::$csvConfig["LAST_ACTIVATION_CALL"]]);

@@ -47,7 +47,8 @@ class DbAdapter {
     {
         $this->openConnection();
         $inFieldList = ['assoc_code', 'assoc_name', 'reg_code', 'reg_name', 'code', 'name',
-        'sota_id', 'altitude_m', 'altitude_ft', 'longitude', 'latitude', 'points', 'bonus_points', 'valid_from', 'valid_to'];
+            'sota_id', 'altitude_m', 'altitude_ft', 'longitude', 'latitude', 'points', 'bonus_points', 'valid_from',
+            'valid_to', 'activations_count', 'last_activation_date', 'last_activation_call'];
         $outFieldList = ['new_assoc', 'new_region', 'new_summit', 'upd_assoc', 'upd_region', 'upd_summit'];
         $psQuery = "CALL add_summit(";
         $i = 0;
@@ -83,6 +84,9 @@ class DbAdapter {
         $bonus_points = '';
         $valid_from = '';
         $valid_to = '';
+        $last_activation_date = '';
+        $last_activation_call = '';
+        $activations_count = 0;
 
         foreach ($inFieldList as $field) {
             $st->bindParam(':' . $field, ${$field});
@@ -107,6 +111,15 @@ class DbAdapter {
             $bonus_points = (int)$summit->getBonusPoints();
             $valid_from = (string)DateUtils::toDatabaseDate($summit->getValidFrom());
             $valid_to = (string)DateUtils::toDatabaseDate($summit->getValidTo());
+            $lActDate = $summit->getLastActivationDate();
+            $lActCall = $summit->getLastActivationCall();
+            $actCount = $summit->getActivationCount();
+            if (isset($lActDate) && $lActDate != '')
+                $last_activation_date = (string)DateUtils::toDatabaseDate($lActDate);
+            if (isset($lActCall) && $lActCall != '')
+                $last_activation_call = (string)$lActCall;
+            if (isset($actCount) && $actCount != '')
+                $activations_count = (int)$actCount;
             if ($st->execute() === false) {
                 echo(implode($st->errorInfo()));
             }

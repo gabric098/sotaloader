@@ -38,13 +38,13 @@ class CsvSummit {
     private $points;
     /* @var $bonusPoints int */
     private $bonusPoints;
-    /* @var $validFrom SotaDateTime */
+    /* @var $validFrom \DateTime */
     private $validFrom;
-    /* @var $validTo SotaDateTime */
+    /* @var $validTo \DateTime */
     private $validTo;
     /* @var $activationCount int */
     private $activationCount;
-    /* @var $lastActivationDate SotaDateTime */
+    /* @var $lastActivationDate \DateTime */
     private $lastActivationDate;
     /* @var $lastActivationCall string */
     private $lastActivationCall;
@@ -154,7 +154,7 @@ class CsvSummit {
     }
 
     /**
-     * @return SotaDateTime
+     * @return \DateTime
      */
     public function getLastActivationDate()
     {
