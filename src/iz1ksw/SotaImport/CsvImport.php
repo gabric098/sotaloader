@@ -53,7 +53,7 @@ class CsvImport {
         // send a confirmation email
         if (isset($this->config['mail_to']) && $this->config['mail_to'] != '') {
             $this->log->info("Sending confirmation email to " . $this->config['mail_to']);
-            $this->sendMail($dba->getOutput());
+            $this->sendMail($dba->getOutput(), $parser->getErrors());
         }
 
         // rename temporary file with date
@@ -75,8 +75,15 @@ class CsvImport {
         }
     }
 
-    private function sendMail($results) {
+    private function sendMail($results, $parserErrors) {
         $message = "Import execution result:\r\n";
+        if (count($parserErrors) > 0) {
+            $message .= "ERROR on CSV on:\r\n";
+            foreach ($parserErrors as $parserError) {
+                $message .= "line: " . $parserError. "\r\n";
+            }
+        }
+
         $message .= "-------------------------------------------------------------------------------------------\r\n";
         $message .= "New associations: " . count($results["new_assoc"]) . "\r\n";
         $message .= $this->printArrayVals($results["new_assoc"]) . "\r\n";
@@ -91,7 +98,8 @@ class CsvImport {
         $message .= "Updated summits: " . count($results["upd_summit"]) . "\r\n";
         $message .= $this->printArrayVals($results["upd_summit"]);
         $message .= "-------------------------------------------------------------------------------------------";
-        mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
+        echo($message);
+        //mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
     }
 
     private function printArrayVals($array) {

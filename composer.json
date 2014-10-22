@@ -1,5 +1,6 @@
 {
     "name": "iz1ksw/SotaImport",
+    "version": "1.0.0-alpha1",
     "description": "Library to convert and import Summit list csv to MySql db",
     "minimum-stability": "alpha",
     "license": "Apache-2.0",

@@ -76,16 +76,16 @@ class DbAdapter {
         $code = '';
         $name = '';
         $sota_id = '';
-        $altitude_m = '';
-        $altitude_ft = '';
-        $latitude = '';
-        $longitude = '';
-        $points = '';
-        $bonus_points = '';
+        $altitude_m = 0;
+        $altitude_ft = 0;
+        $latitude = 0;
+        $longitude = 0;
+        $points = 0;
+        $bonus_points = 0;
         $valid_from = '';
         $valid_to = '';
-        $last_activation_date = '';
-        $last_activation_call = '';
+        $last_activation_date = null;
+        $last_activation_call = null;
         $activations_count = 0;
 
         foreach ($inFieldList as $field) {
@@ -114,6 +114,9 @@ class DbAdapter {
             $lActDate = $summit->getLastActivationDate();
             $lActCall = $summit->getLastActivationCall();
             $actCount = $summit->getActivationCount();
+            $last_activation_date = null;
+            $last_activation_call = null;
+            $activations_count = 0;
             if (isset($lActDate) && $lActDate != '')
                 $last_activation_date = (string)DateUtils::toDatabaseDate($lActDate);
             if (isset($lActCall) && $lActCall != '')
