@@ -124,7 +124,7 @@ class DbAdapter {
             if (isset($actCount) && $actCount != '')
                 $activations_count = (int)$actCount;
             if ($st->execute() === false) {
-                echo(implode($st->errorInfo()));
+                $this->log->error("Error executing prepared statement: " . implode($st->errorInfo()));
             }
             $outputArray = $this->pdo->query("SELECT @new_assoc, @new_region, @new_summit, @upd_assoc, @upd_region, @upd_summit")->fetchAll();
 

@@ -98,8 +98,7 @@ class CsvImport {
         $message .= "Updated summits: " . count($results["upd_summit"]) . "\r\n";
         $message .= $this->printArrayVals($results["upd_summit"]);
         $message .= "-------------------------------------------------------------------------------------------";
-        echo($message);
-        //mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
+        mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
     }
 
     private function printArrayVals($array) {
