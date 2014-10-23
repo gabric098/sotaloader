@@ -223,8 +223,7 @@ class SotaCsvParser {
         $isValid = true;
         switch ($type) {
             case 'summitcode':
-                //$pattern = '/^[A-Z0-9][A-Z0-9]?[A-Z0-9]?\/[A-Z][A-Z]-[0-9][0-9][0-9]$/';
-                $pattern = '/^[A-Z0-9][A-Z0-9]?[A-Z0-9]?\/[A-Z][A-Z]-[0-9][0-9]?[0-9]?$/';
+                $pattern = '/^[A-Z0-9][A-Z0-9]?[A-Z0-9]?\/[A-Z][A-Z]-[0-9][0-9][0-9]$/';
                 if (preg_match($pattern, $value)) {
                     $returnValue = $value;
                 } else {
