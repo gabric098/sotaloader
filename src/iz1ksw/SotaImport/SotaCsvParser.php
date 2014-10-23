@@ -15,11 +15,32 @@ class SotaCsvParser {
     const csvPointerFile = 'last_loc.txt';
     const csvBufferSize = 1000; // processes 1000 lines batches
 
+    /**
+     * @var bool
+     */
     private $hasMoreData = true;
+    /**
+     * @var int
+     */
     private $bufferPages = 0;
+    /**
+     * @var
+     */
     private $csvFilePath;
+    /**
+     * @var CsvSummit[]
+     */
     private $csvSummitsArray;
+    /**
+     * @var array
+     */
     private $errors = array();
+    /**
+     * Count all the valid summits
+     * @var int
+     */
+    private $validSummitsCount = 0;
+
     private static $csvConfig = array("SUMMIT_CODE" => 0,
                                         "ASSOCIATION_NAME" => 1,
                                         "REGION_NAME" => 2,
@@ -89,6 +110,7 @@ class SotaCsvParser {
                 } else if (($data = fgetcsv($handle)) !== false) {
                     try {
                         $this->csvSummitsArray[] = $this->processCsvRow($data);
+                        $this->validSummitsCount++;
                     } catch (\Exception $e) {
                         $this->errors[] = $this->getAbsoluteCsvLine($csvProcessedLinesCount);
                     } finally{
@@ -279,6 +301,7 @@ class SotaCsvParser {
     }
 
     /**
+     * Returns the list of validation errors occured.
      * @return array
      */
     public function getErrors()
@@ -286,7 +309,19 @@ class SotaCsvParser {
         return $this->errors;
     }
 
+    /**
+     * Returns the array of CsvSummit ready to be processed.
+     * @return CsvSummit[]
+     */
     public function getCsvArray() {
         return $this->csvSummitsArray;
+    }
+
+    /**
+     * Returns the number of summits which passed validation.
+     * @return int
+     */
+    public function getValidSummitsCount() {
+        return $this->validSummitsCount;
     }
 }

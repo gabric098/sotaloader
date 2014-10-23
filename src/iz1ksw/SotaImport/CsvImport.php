@@ -44,7 +44,8 @@ class CsvImport {
         $this->log = SotaLogger::getLogger();
     }
 
-    public function execute() {
+    public function execute()
+    {
         $this->csvFileName = basename($this->csvFilePath);
 
         // if filepath is an url, copy remote file to a temp file name
@@ -62,7 +63,8 @@ class CsvImport {
         // send a confirmation email
         if ($this->sendMail && isset($this->config['mail_to']) && $this->config['mail_to'] != '') {
             $this->log->info("Sending confirmation email to " . $this->config['mail_to']);
-            $this->sendMail($dba->getOutput(), $parser->getErrors());
+            $this->sendMail($dba->getOutput(), $parser->getErrors(),
+                $dba->countExistingSummits(), $parser->getValidSummitsCount());
         }
 
         // rename temporary file with date
@@ -70,6 +72,8 @@ class CsvImport {
             date('Ymd') . '_'. $this->csvFileName)) {
             $this->log->error("Unable to rename temporary file");
         }
+        $this->log->info("Total valid CSV lines: " . $parser->getValidSummitsCount());
+        $this->log->info("Total records on summits table: " . $dba->countExistingSummits());
         $this->log->info("CSV file process finished.");
     }
 
@@ -84,13 +88,23 @@ class CsvImport {
         }
     }
 
-    private function sendMail($results, $parserErrors) {
+    private function sendMail($results, $parserErrors, $dbCount, $csvCount)
+    {
         $message = "Import execution result:\r\n";
+
+        // track CSV validation errors
         if (count($parserErrors) > 0) {
-            $message .= "ERROR on CSV on:\r\n";
+            $message .= "Validation errors on CSV on:\r\n";
             foreach ($parserErrors as $parserError) {
                 $message .= "line: " . $parserError. "\r\n";
             }
+        }
+
+        // db/csv count mismatch (deletion?)
+        if ($dbCount != $csvCount) {
+            $message .= "CSV/DB rows count mismatch:\r\n";
+            $message .= "Rows in DB: " . $dbCount . "\r\n";
+            $message .= "Rows in CSV: " . $csvCount . "\r\n";
         }
 
         $message .= "-------------------------------------------------------------------------------------------\r\n";
@@ -110,7 +124,8 @@ class CsvImport {
         mail($this->config['mail_to'], "[SotaImport] Result report", $message, "From: " . $this->config['mail_from']);
     }
 
-    private function printArrayVals($array) {
+    private function printArrayVals($array)
+    {
         $msg = '';
         foreach($array as $val ) {
             $msg .= $val . "\r\n";
@@ -122,7 +137,8 @@ class CsvImport {
      * Enable or disable sending email report
      * @param bool $sendMail
      */
-    public function setSendMail($sendMail) {
+    public function setSendMail($sendMail)
+    {
         $this->sendMail = $sendMail;
     }
 
@@ -130,7 +146,8 @@ class CsvImport {
      * Set the csv file location (overrides the location read from ini file)
      * @param $csvFilePath
      */
-    public function setCsvFilePath($csvFilePath) {
+    public function setCsvFilePath($csvFilePath)
+    {
         $this->csvFilePath = $csvFilePath;
     }
 } 

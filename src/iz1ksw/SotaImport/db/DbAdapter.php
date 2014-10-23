@@ -178,4 +178,18 @@ class DbAdapter {
         return $this->output;
     }
 
+    /**
+     * Returns the number of existing summits in summits table
+     */
+    public function countExistingSummits()
+    {
+        $count = 0;
+        $sqlQuery = "SELECT COUNT(id) as summits_count FROM summits";
+        $this->openConnection();
+        foreach ($this->pdo->query($sqlQuery) as $row){
+            $count = intval($row['summits_count']);
+        }
+        $this->closeConnection();
+        return $count;
+    }
 }
