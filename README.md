@@ -9,8 +9,8 @@ SOTA API data loader
 3. Create the database structure using the sql script provided in sql/db.sql 
 4. Configure your database connection editing `config.ini`
 5. If you want to receive a mail report, configure your email settings in `config.ini`
-6. Run `php cli.php [options]`
-Options:
-  `--version`               Display the current version
-  `--nomail`                Do not send report email
-  `--csvfile <arg>`         Use the specified path as csv input file
+6. Run `php cli.php [options]`<br>
+Options:<br>
+  `--version`               Display the current version<br>
+  `--nomail`                Do not send report email<br>
+  `--csvfile <arg>`         Use the specified path as csv input file<br>
