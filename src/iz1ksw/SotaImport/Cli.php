@@ -15,7 +15,7 @@ class Cli {
     /**
      * The application version
      */
-    const VERSION = '1.0.0-alpha1';
+    const VERSION = '1.0.0-alpha2';
 
     public static function main() {
         // manage the command line options
